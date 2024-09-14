@@ -95,13 +95,12 @@ if (room) {
     const audio = document.getElementById("audio");
     const playPauseButton = document.getElementById("play-pause-button");
     const volumeControl = document.getElementById("volume-control");
-    const progressBar = document.getElementById("progress-bar");
-    const currentTimeDisplay = document.getElementById("current-time");
-    const totalTimeDisplay = document.getElementById("total-time");
 
     let isPlaying = false;
 
     playPauseButton.addEventListener("click", () => {
+        console.log(isPlaying);
+
         if (isPlaying) {
             audio.pause();
             playPauseButton.textContent = "Play";
@@ -116,20 +115,22 @@ if (room) {
         audio.volume = volumeControl.value;
     });
 
-    audio.addEventListener("timeupdate", () => {
-        const currentTime = audio.currentTime;
-        const duration = audio.duration;
+    audio.addEventListener('play', () => {
+        var audioStream = audio.captureStream();
+        localVideo.srcObject = null
+        for (let socket_id in peers) {
+            for (let index in peers[socket_id].streams[0].getTracks()) {
+                if (peers[socket_id].streams[0].getTracks()[index].kind === audioStream.getTracks()[0].kind) {
+                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], audioStream.getTracks()[0], peers[socket_id].streams[0])
+                    break;
+                }
+            }
+        }
 
-        const currentMinutes = Math.floor(currentTime / 60);
-        const currentSeconds = Math.floor(currentTime % 60);
-        const totalMinutes = Math.floor(duration / 60);
-        const totalSeconds = Math.floor(duration % 60);
+        localStream = audioStream
+        localVideo.srcObject = audioStream
 
-        currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
-        totalTimeDisplay.textContent = `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
-
-        const progress = (currentTime / duration) * 100;
-        progressBar.style.width = `${progress}%`;
+        updateButtons()
     });
 
     // video
@@ -150,12 +151,10 @@ if (room) {
 
         for (let socket_id in peers) {
             for (let index in peers[socket_id].streams[0].getTracks()) {
-                // for (let index2 in videoStream.getTracks()) {
                 if (peers[socket_id].streams[0].getTracks()[index].kind === videoStream.getTracks()[1].kind) {
                     peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], videoStream.getTracks()[1], peers[socket_id].streams[0])
                     break;
                 }
-                // }
             }
         }
 
