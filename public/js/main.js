@@ -72,17 +72,99 @@ constraints.video.facingMode = {
     ideal: "user"
 }
 
-// enabling the camera at startup
-navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-    console.log('Received local stream');
+/////////////////////////////////////////////
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const room = urlParams.get('room');
 
-    localVideo.srcObject = stream;
-    localVideo.className = " absolute z-10 bottom-[5px] right-[5px] h-[150px] rounded-lg shadow-xl";
-    localStream = stream;
+if (room) {
 
-    init()
+    // enabling the camera at startup
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+        console.log('Received local stream');
 
-}).catch(e => alert(`getusermedia error ${e.name}`))
+        localVideo.srcObject = stream;
+        localVideo.className = " absolute z-10 bottom-[5px] right-[5px] h-[150px] rounded-lg shadow-xl overflow-auto resize";
+        localStream = stream;
+
+        init()
+
+    }).catch(e => alert(`getusermedia error ${e.name}`))
+
+    // audio
+    const audio = document.getElementById("audio");
+    const playPauseButton = document.getElementById("play-pause-button");
+    const volumeControl = document.getElementById("volume-control");
+    const progressBar = document.getElementById("progress-bar");
+    const currentTimeDisplay = document.getElementById("current-time");
+    const totalTimeDisplay = document.getElementById("total-time");
+
+    let isPlaying = false;
+
+    playPauseButton.addEventListener("click", () => {
+        if (isPlaying) {
+            audio.pause();
+            playPauseButton.textContent = "Play";
+        } else {
+            audio.play();
+            playPauseButton.textContent = "Pause";
+        }
+        isPlaying = !isPlaying;
+    });
+
+    volumeControl.addEventListener("input", () => {
+        audio.volume = volumeControl.value;
+    });
+
+    audio.addEventListener("timeupdate", () => {
+        const currentTime = audio.currentTime;
+        const duration = audio.duration;
+
+        const currentMinutes = Math.floor(currentTime / 60);
+        const currentSeconds = Math.floor(currentTime % 60);
+        const totalMinutes = Math.floor(duration / 60);
+        const totalSeconds = Math.floor(duration % 60);
+
+        currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
+        totalTimeDisplay.textContent = `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
+
+        const progress = (currentTime / duration) * 100;
+        progressBar.style.width = `${progress}%`;
+    });
+
+    // video
+    const videoFileInput = document.getElementById('videoFileInput');
+    const videoPlayer = document.getElementById('videoPlayer');
+
+    // Khi người dùng chọn một video
+    videoFileInput && videoFileInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        const url = URL.createObjectURL(file);
+        videoPlayer.src = url;
+        videoPlayer.load();
+    });
+    videoPlayer.addEventListener('play', () => {
+        var videoStream = videoPlayer.captureStream();
+
+        localVideo.srcObject = null
+
+        for (let socket_id in peers) {
+            for (let index in peers[socket_id].streams[0].getTracks()) {
+                // for (let index2 in videoStream.getTracks()) {
+                if (peers[socket_id].streams[0].getTracks()[index].kind === videoStream.getTracks()[1].kind) {
+                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], videoStream.getTracks()[1], peers[socket_id].streams[0])
+                    break;
+                }
+                // }
+            }
+        }
+
+        localStream = videoStream
+        localVideo.srcObject = videoStream
+
+        updateButtons()
+    });
+}
 
 /**
  * initialize the socket connections
@@ -227,6 +309,8 @@ function switchMedia() {
  * Enable screen share
  */
 function setScreen() {
+    console.log("Set screen");
+
     navigator.mediaDevices.getDisplayMedia().then(stream => {
         for (let socket_id in peers) {
             for (let index in peers[socket_id].streams[0].getTracks()) {
@@ -271,8 +355,8 @@ function removeLocalStream() {
  */
 function toggleMute() {
     for (let index in localStream.getAudioTracks()) {
-        localStream.getAudioTracks()[index].enabled = !localStream.getAudioTracks()[index].enabled
-        muteButton.innerText = localStream.getAudioTracks()[index].enabled ? "Unmuted" : "Muted"
+        localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled
+        muteButton.innerText = localStream.getAudioTracks()[0].enabled ? "Muted" : "Unmuted"
     }
 }
 /**

@@ -3,7 +3,14 @@
 <head>
     <script lang="text/javascript" src="/socket.io/socket.io.js"></script>
     <script src="/simple-peer/simplepeer.min.js"></script>
+    <link rel="icon" href="logo.png" type="image/gif" sizes="16x16">
     <style>
+        body {
+            background-color: rgb(2, 0, 36);
+            /* For browsers that do not support gradients */
+            background-image: linear-gradient(rgba(19, 195, 199, 1) 0%, rgba(9, 121, 116, 1) 0%, rgba(0, 212, 255, 1) 100%);
+        }
+
         .containers {
             display: grid;
             grid-gap: 5px;
@@ -17,7 +24,7 @@
 
         .vid {
             flex: 0 1 auto;
-            height: 400px;
+            height: 200px;
         }
 
         .settings {
@@ -32,33 +39,92 @@
             margin: 2px 2px;
             cursor: pointer;
         }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .progress {
+            height: 10px;
+            background-color: #ccc;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background-color: #4caf50;
+        }
+
+        #current-time,
+        #total-time {
+            margin-top: 10px;
+        }
     </style>
+    <title>WebRTC</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <h1 class=" text-center text-3xl font-bold">Realtime communication with WebRTC</h1>
-    <form id="form-submit">
+<body class="p-10">
+    <h1 class=" text-center text-4xl mb-10 text-white font-bold">Learning WebRTC</h1>
+    <form id="form-submit" class=" flex items-center justify-center space-x-3">
         <input type="text" class="w-96 h-10 rounded-xl border border-black p-2" id="room" />
         <button type="submit"
-            class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+            class="text-black font-semibold bg-gradient-to-r from-[#86c588] via-[#72e476] to-[#4caf50] hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 rounded-lg text-sm px-5 py-2.5 text-center me-2">
             JOIN
         </button>
     </form>
-    <div id="videos" class="container">
+    <div class=" flex flex-col items-center justify-center space-y-5">
+        <div class="flex items-center justify-center space-x-5 w-full">
+            <div
+                class=" flex flex-col  bg-white justify-between border-2 border-none p-5 rounded-2xl shadow-xl w-[500px] h-[400px]">
+                <video autoplay id="videoPlayer" controls width="100%">
+                    <!-- <source id="videoSource" src="" type="video/mp4"> -->
+                    Trình duyệt của bạn không hỗ trợ video.
+                </video>
+                <input type="file" id="videoFileInput" accept="video/*">
+            </div>
+            <div class="border-2 bg-white  border-none p-5 rounded-2xl shadow-xl w-[500px] h-[400px]">
+                <audio id="audio" controls width="400">
+                    <source src="./music.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                <div class="controls">
+                    <button id="play-pause-button">Play</button>
+                    <input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div id="current-time">0:00</div>
+                <div id="total-time">0:00</div>
+            </div>
+        </div>
+        <div style="display:block" class=" bg-white rounded-2xl shadow-xl bg-white p-5">
+            <button id="switchButton" class="settings" onclick="switchMedia()">Switch
+                Camera</button>
+            <button id="muteButton" class="settings" onclick="toggleMute()">Unmuted</button>
+            <button id="vidButton" class="settings" onclick="toggleVid()">Cam Enabled</button>
+        </div>
+    </div>
+    <center id="videos" class="container space-x-4">
         <video id="localVideo" class="vid" autoplay muted playsinline disablePictureInPicture></video>
-    </div>
-    <br />
-    <div style="display:block">
-        <button id="switchButton" class="settings" onclick="switchMedia()">Switch
-            Camera</button>
-        <button id="muteButton" class="settings" onclick="toggleMute()">Unmuted</button>
-        <button id="vidButton" class="settings" onclick="toggleVid()">Video Enabled</button>
-    </div>
+    </center>
 </body>
 <footer>
     <script src='/js/main.js' lang="text/javascript"></script>
-
+    <script>
+        document.getElementById("form-submit").addEventListener("submit", function (e) {
+            e.preventDefault();
+            let room = document.getElementById("room");
+            if (room.value) {
+                window.location.href = `?room=${room.value}`;
+            }
+        })
+    </script>
 
 </footer>
 
