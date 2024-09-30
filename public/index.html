@@ -87,27 +87,36 @@
                 </video>
                 <input type="file" id="videoFileInput" accept="video/*">
             </div>
-            <div class="border-2 bg-white  border-none p-5 rounded-2xl shadow-xl w-[500px] h-[400px]">
+            <div
+                class="border-2 bg-white flex flex-col justify-between border-none p-5 rounded-2xl shadow-xl w-[500px] h-[400px]">
                 <audio id="audio" controls width="400">
                     <source src="./music.mp3" type="audio/mpeg">
                     Your browser does not support the audio element.
                 </audio>
-                <div class="controls">
-                    <button id="play-pause-button" class="text-white bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 shadow-lg shadow-purple-500/50 dark:shadow-lg dark:shadow-purple-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Play</button>
-                    <input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
+                <div>
+                    <div>
+                        <input type="file" id="videoFileInput" accept="audio/*">
+                    </div>
                 </div>
             </div>
         </div>
-        <div style="display:block" class=" bg-white rounded-2xl shadow-xl bg-white p-5">
-            <button id="switchButton" class="settings" onclick="switchMedia()">Switch
-                Camera</button>
-            <button id="muteButton" class="settings" onclick="toggleMute()">Unmuted</button>
-            <button id="vidButton" class="settings" onclick="toggleVid()">Cam Enabled</button>
+        <div class=" bg-white rounded-2xl shadow-xl bg-white p-5">
+            <div class="controls w-full flex justify-center">
+                <button id="play-pause-button"
+                    class="text-white font-semibold bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 shadow-lg shadow-purple-500/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Play
+                    both</button>
+            </div>
+            <div style="display:block" class=" bg-white rounded-2xl shadow-xl bg-white p-5">
+                <button id="switchButton" class="settings" onclick="switchMedia()">Switch
+                    Camera</button>
+                <button id="muteButton" class="settings" onclick="toggleMute()">Unmuted</button>
+                <button id="vidButton" class="settings" onclick="toggleVid()">Cam Enabled</button>
+            </div>
         </div>
     </div>
-    <center id="videos" class="container space-x-4">
+    <div id="videos" class="container space-x-4">
         <video id="localVideo" class="vid" autoplay muted playsinline disablePictureInPicture></video>
-    </center>
+    </div>
 </body>
 <footer>
     <script src='/js/main.js' lang="text/javascript"></script>

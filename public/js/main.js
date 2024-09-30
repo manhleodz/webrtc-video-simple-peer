@@ -11,9 +11,9 @@ let localStream = null;
  */
 let peers = {}
 
-// redirect if not https
-if (location.href.substr(0, 5) !== 'https')
-    location.href = 'https' + location.href.substr(4, location.href.length - 4)
+// // redirect if not https
+// if (location.href.substr(0, 5) !== 'https')
+//     location.href = 'https' + location.href.substr(4, location.href.length - 4)
 
 
 //////////// CONFIGURATION //////////////////
@@ -94,7 +94,6 @@ if (room) {
     // audio
     const audio = document.getElementById("audio");
     const playPauseButton = document.getElementById("play-pause-button");
-    const volumeControl = document.getElementById("volume-control");
 
     let isPlaying = false;
 
@@ -109,10 +108,6 @@ if (room) {
             playPauseButton.textContent = "Pause";
         }
         isPlaying = !isPlaying;
-    });
-
-    volumeControl.addEventListener("input", () => {
-        audio.volume = volumeControl.value;
     });
 
     audio.addEventListener('play', () => {
@@ -144,6 +139,7 @@ if (room) {
         videoPlayer.src = url;
         videoPlayer.load();
     });
+
     videoPlayer.addEventListener('play', () => {
         var videoStream = videoPlayer.captureStream();
 
