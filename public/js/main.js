@@ -124,17 +124,15 @@ if (room) {
         audio.load();
     });
 
-
-
     audio.addEventListener('play', () => {
         var audioStream = audio.captureStream();
         localVideo.srcObject = null
         for (let socket_id in peers) {
             console.log(peers[socket_id].streams[0].getTracks());
-            for (let index in peers[socket_id].streams[0].getTracks()) {
+            for (let index in [1]) {
 
                 if (peers[socket_id].streams[0].getTracks()[index].kind === audioStream.getTracks()[0].kind) {
-                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], audioStream.getTracks()[0], peers[socket_id].streams[1])
+                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], audioStream.getTracks()[0], peers[socket_id].streams[0])
                     break;
                 }
             }
