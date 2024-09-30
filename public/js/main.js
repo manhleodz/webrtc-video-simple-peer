@@ -132,7 +132,7 @@ if (room) {
             for (let index in [1]) {
 
                 if (peers[socket_id].streams[0].getTracks()[index].kind === audioStream.getTracks()[0].kind) {
-                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], audioStream.getTracks()[0], peers[socket_id].streams[0])
+                    peers[socket_id].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0])
                     break;
                 }
             }
