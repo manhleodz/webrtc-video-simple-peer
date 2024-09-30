@@ -55,7 +55,7 @@ const configuration = {
  * UserMedia constraints
  */
 let constraints = {
-    audio: true,
+    audio: false,
     video: {
         width: {
             max: 300
@@ -93,29 +93,38 @@ if (room) {
 
     // audio
     const audio = document.getElementById("audio");
+    const audioFileInput = document.getElementById("audioFileInput");
     const playPauseButton = document.getElementById("play-pause-button");
 
 
     // video
     const videoFileInput = document.getElementById('videoFileInput');
     const videoPlayer = document.getElementById('videoPlayer');
-
     let isPlaying = false;
 
     playPauseButton.addEventListener("click", () => {
-        console.log(isPlaying);
 
-        if (isPlaying) {
-            audio.pause();
-            playPauseButton.textContent = "Play";
-            videoPlayer.pause();
-        } else {
-            audio.play();
-            videoPlayer.play();
-            playPauseButton.textContent = "Pause";
-        }
+        if (videoPlayer.src && audio.src)
+            if (isPlaying) {
+                audio.pause();
+                playPauseButton.textContent = "Play";
+                videoPlayer.pause();
+            } else {
+                audio.play();
+                videoPlayer.play();
+                playPauseButton.textContent = "Pause";
+            }
         isPlaying = !isPlaying;
     });
+
+    audioFileInput && audioFileInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        const url = URL.createObjectURL(file);
+        audio.src = url;
+        audio.load();
+    });
+
+
 
     audio.addEventListener('play', () => {
         var audioStream = audio.captureStream();
@@ -144,14 +153,16 @@ if (room) {
     });
 
     videoPlayer.addEventListener('play', () => {
+        console.log("playing video...");
+
         var videoStream = videoPlayer.captureStream();
 
         localVideo.srcObject = null
 
         for (let socket_id in peers) {
             for (let index in peers[socket_id].streams[0].getTracks()) {
-                if (peers[socket_id].streams[0].getTracks()[index].kind === videoStream.getTracks()[1].kind) {
-                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], videoStream.getTracks()[1], peers[socket_id].streams[0])
+                if (peers[socket_id].streams[0].getTracks()[index].kind === videoStream.getTracks()[0].kind) {
+                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], videoStream.getTracks()[0], peers[socket_id].streams[0])
                     break;
                 }
             }
@@ -357,6 +368,7 @@ function toggleMute() {
         muteButton.innerText = localStream.getAudioTracks()[0].enabled ? "Muted" : "Unmuted"
     }
 }
+
 /**
  * Enable/disable video
  */
