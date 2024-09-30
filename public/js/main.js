@@ -95,6 +95,11 @@ if (room) {
     const audio = document.getElementById("audio");
     const playPauseButton = document.getElementById("play-pause-button");
 
+
+    // video
+    const videoFileInput = document.getElementById('videoFileInput');
+    const videoPlayer = document.getElementById('videoPlayer');
+
     let isPlaying = false;
 
     playPauseButton.addEventListener("click", () => {
@@ -103,8 +108,10 @@ if (room) {
         if (isPlaying) {
             audio.pause();
             playPauseButton.textContent = "Play";
+            videoPlayer.pause();
         } else {
             audio.play();
+            videoPlayer.play();
             playPauseButton.textContent = "Pause";
         }
         isPlaying = !isPlaying;
@@ -127,10 +134,6 @@ if (room) {
 
         updateButtons()
     });
-
-    // video
-    const videoFileInput = document.getElementById('videoFileInput');
-    const videoPlayer = document.getElementById('videoPlayer');
 
     // Khi người dùng chọn một video
     videoFileInput && videoFileInput.addEventListener('change', function (event) {
