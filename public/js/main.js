@@ -126,20 +126,16 @@ if (room) {
 
     audio.addEventListener('play', () => {
         var audioStream = audio.captureStream();
-        localVideo.srcObject = null
+
         for (let socket_id in peers) {
             console.log(peers[socket_id].streams[0].getTracks());
-            for (let index in [1]) {
+            console.log(audioStream.getTracks());
 
-                if (peers[socket_id].streams[0].getTracks()[index].kind === audioStream.getTracks()[0].kind) {
-                    peers[socket_id].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0])
-                    break;
-                }
-            }
+            // if (peers[socket_id].streams[0].getTracks()[1].kind === audioStream.getTracks()[1].kind) {
+            peers[socket_id].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0])
+            //     break;
+            // }
         }
-
-        localStream = audioStream
-        localVideo.srcObject = audioStream
 
         updateButtons()
     });
@@ -256,6 +252,8 @@ function addPeer(socket_id, am_initiator) {
     })
 
     peers[socket_id].on('stream', stream => {
+        console.log(stream);
+
         let newVid = document.createElement('video')
         newVid.srcObject = stream
         newVid.id = socket_id
