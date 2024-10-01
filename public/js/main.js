@@ -131,6 +131,8 @@ if (room) {
 
         for (let socket_id in peers) {
             if (peers[socket_id].streams[0].getTracks().length = 1 && peers[socket_id].streams[0].getTracks()[0].kind != 'audio') {
+                console.log("Cos moi video thoi af...");
+
                 peers[socket_id].streams[0].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0]);
                 break;
             }
@@ -175,21 +177,32 @@ if (room) {
                         break;
                     }
                 }
-                // if (track.kind === videoStream.getTracks()[0].kind) {
-                //     break;
-                // }
             }
         }
 
         var audioStream = audio.captureStream();
         if (audioStream.getTracks()[0]) {
+            const audioTrack = audioStream.getTracks()[0];
+            var newStream = new MediaStream();
+            newStream.addTrack(audioTrack)
+            for (let track of videoStream.getTracks()) {
+                if (track.kind == 'video') {
+                    newStream.addTrack(track);
+                    break;
+                }
+            }
+            localStream = newStream;
+            console.log(localStream);
 
+            updateButtons()
+            return;
         }
 
         localStream = videoStream
         localVideo.srcObject = videoStream
 
         updateButtons()
+        return;
     });
 }
 
