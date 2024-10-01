@@ -128,6 +128,10 @@ if (room) {
         var audioStream = audio.captureStream();
 
         for (let socket_id in peers) {
+            if (peers[socket_id].streams[0].getTracks().length = 1 && peers[socket_id].streams[0].getTracks()[0].kind != 'audio') {
+                peers[socket_id].streams[0].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0]);
+                break;
+            }
             for (let track of peers[socket_id].streams[0].getTracks()) {
                 for (let new_track of audioStream.getTracks()) {
                     if (track.kind == new_track.kind && track.kind == 'audio') {
