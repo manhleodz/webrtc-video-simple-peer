@@ -191,7 +191,7 @@ if (room) {
             newStream.addTrack(audioTrack)
             for (let track of videoStream.getTracks()) {
                 if (track.kind == 'video') {
-                    console.log("Video track...");
+                    console.log("Add Video track into localStream...");
 
                     newStream.addTrack(track);
                     break;
