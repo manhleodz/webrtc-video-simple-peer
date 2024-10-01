@@ -182,17 +182,22 @@ if (room) {
 
         var audioStream = audio.captureStream();
         if (audioStream.getTracks()[0]) {
+            console.log("Audio stream has audio");
+
             const audioTrack = audioStream.getTracks()[0];
             var newStream = new MediaStream();
             newStream.addTrack(audioTrack)
             for (let track of videoStream.getTracks()) {
                 if (track.kind == 'video') {
+                    console.log("Video track...");
+
                     newStream.addTrack(track);
                     break;
                 }
             }
             localStream = newStream;
-            console.log(localStream);
+            localVideo.srcObject = newStream
+            console.log(localStream.getTracks());
 
             updateButtons()
             return;
