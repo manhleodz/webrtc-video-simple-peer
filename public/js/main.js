@@ -263,13 +263,7 @@ function addPeer(socket_id, am_initiator) {
     peers[socket_id] = new SimplePeer({
         initiator: am_initiator,
         stream: localStream,
-        // config: configuration
-        config: {
-            iceServers: [{
-                'url': 'stun:stun.l.google.com:19302'
-            }
-            ]
-        },
+        config: configuration
     });
 
     peers[socket_id].on('signal', data => {
