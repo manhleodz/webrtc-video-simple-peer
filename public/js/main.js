@@ -11,11 +11,6 @@ let localStream = null;
  */
 let peers = {}
 
-// // redirect if not https
-// if (location.href.substr(0, 5) !== 'https')
-//     location.href = 'https' + location.href.substr(4, location.href.length - 4)
-
-
 //////////// CONFIGURATION //////////////////
 
 /**
@@ -102,13 +97,19 @@ if (room) {
     const videoPlayer = document.getElementById('videoPlayer');
     let isPlaying = false;
 
-    playPauseButton.addEventListener("click", () => {
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
+    playPauseButton.addEventListener("click", async () => {
+        for (let socket_id in peers) {
+            console.log(peers[socket_id].streams[0].getTracks());
+        }
         if (videoPlayer.src && audio.src)
             if (isPlaying) {
                 audio.pause();
-                playPauseButton.textContent = "Play";
                 videoPlayer.pause();
+                playPauseButton.textContent = "Play";
             } else {
                 audio.play();
                 videoPlayer.play();
@@ -126,6 +127,7 @@ if (room) {
 
     audio.addEventListener('play', () => {
         var audioStream = audio.captureStream();
+        console.log("Playing audio..");
 
         for (let socket_id in peers) {
             if (peers[socket_id].streams[0].getTracks().length = 1 && peers[socket_id].streams[0].getTracks()[0].kind != 'audio') {
@@ -133,11 +135,10 @@ if (room) {
                 break;
             }
             for (let track of peers[socket_id].streams[0].getTracks()) {
-                for (let new_track of audioStream.getTracks()) {
-                    if (track.kind == new_track.kind && track.kind == 'audio') {
-                        peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
-                        break;
-                    }
+                const new_track = audioStream.getTracks()[0];
+                if (track.kind == new_track.kind && track.kind == 'audio') {
+                    peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
+                    break;
                 }
             }
         }
@@ -178,6 +179,11 @@ if (room) {
                 //     break;
                 // }
             }
+        }
+
+        var audioStream = audio.captureStream();
+        if (audioStream.getTracks()[0]) {
+
         }
 
         localStream = videoStream
@@ -257,15 +263,21 @@ function addPeer(socket_id, am_initiator) {
     peers[socket_id] = new SimplePeer({
         initiator: am_initiator,
         stream: localStream,
-        config: configuration
-    })
+        // config: configuration
+        config: {
+            iceServers: [{
+                'url': 'stun:stun.l.google.com:19302'
+            }
+            ]
+        },
+    });
 
     peers[socket_id].on('signal', data => {
         socket.emit('signal', {
             signal: data,
             socket_id: socket_id
         })
-    })
+    });
 
     peers[socket_id].on('stream', stream => {
         console.log(stream);
@@ -279,6 +291,16 @@ function addPeer(socket_id, am_initiator) {
         newVid.onclick = () => openPictureMode(newVid)
         newVid.ontouchstart = (e) => openPictureMode(newVid)
         videos.appendChild(newVid)
+    });
+
+    peers[socket_id].on('track', (track, stream) => {
+        console.log("Receiving track ...");
+        console.log({ track, stream: stream.getTracks() });
+    });
+
+
+    peers[socket_id].on('error', (err) => {
+        console.log("Peer on error: ", err);
     })
 }
 
@@ -379,7 +401,7 @@ function removeLocalStream() {
 function toggleMute() {
     for (let index in localStream.getAudioTracks()) {
         localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled
-        muteButton.innerText = localStream.getAudioTracks()[0].enabled ? "Muted" : "Unmuted"
+        muteButton.innerText = localStream.getAudioTracks()[0].enabled ? "Mute" : "Unmuted"
     }
 }
 
