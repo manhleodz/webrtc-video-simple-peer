@@ -131,10 +131,7 @@ if (room) {
             console.log(peers[socket_id].streams[0].getTracks());
             console.log(audioStream.getTracks());
 
-            // if (peers[socket_id].streams[0].getTracks()[1].kind === audioStream.getTracks()[1].kind) {
             peers[socket_id].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0])
-            //     break;
-            // }
         }
 
         updateButtons()
