@@ -50,7 +50,7 @@ const configuration = {
  * UserMedia constraints
  */
 let constraints = {
-    audio: true,
+    audio: false,
     video: {
         width: {
             max: 300
@@ -139,6 +139,8 @@ if (room) {
             for (let track of peers[socket_id].streams[0].getTracks()) {
                 const new_track = audioStream.getTracks()[0];
                 if (track.kind == new_track.kind && track.kind == 'audio') {
+                    console.log("Them track audio...");
+
                     peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
                     break;
                 }
@@ -196,7 +198,7 @@ if (room) {
                 }
             }
             localStream = newStream;
-            localVideo.srcObject = newStream
+            localVideo.srcObject = videoStream
             console.log(localStream.getTracks());
 
             updateButtons()
@@ -292,7 +294,7 @@ function addPeer(socket_id, am_initiator) {
     });
 
     peers[socket_id].on('stream', stream => {
-        console.log(stream);
+        console.log(stream.getTracks());
 
         let newVid = document.createElement('video')
         newVid.srcObject = stream
