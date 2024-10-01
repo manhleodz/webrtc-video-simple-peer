@@ -55,7 +55,7 @@ const configuration = {
  * UserMedia constraints
  */
 let constraints = {
-    audio: false,
+    audio: true,
     video: {
         width: {
             max: 300
@@ -128,11 +128,19 @@ if (room) {
         var audioStream = audio.captureStream();
 
         for (let socket_id in peers) {
-            console.log(peers[socket_id].streams[0].getTracks());
-            console.log(audioStream.getTracks());
-
-            peers[socket_id].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0])
+            for (let track of peers[socket_id].streams[0].getTracks()) {
+                for (let new_track of audioStream.getTracks()) {
+                    if (track.kind == new_track.kind && track.kind == 'audio') {
+                        peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
+                        break;
+                    }
+                }
+            }
         }
+
+        // for (let socket_id in peers) {
+        //     peers[socket_id].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0])
+        // }
 
         updateButtons()
     });
@@ -148,16 +156,23 @@ if (room) {
     videoPlayer.addEventListener('play', () => {
         console.log("playing video...");
 
+
         var videoStream = videoPlayer.captureStream();
+        console.log(videoStream.getTracks()[0]);
 
         localVideo.srcObject = null
 
         for (let socket_id in peers) {
-            for (let index in peers[socket_id].streams[0].getTracks()) {
-                if (peers[socket_id].streams[0].getTracks()[index].kind === videoStream.getTracks()[0].kind) {
-                    peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], videoStream.getTracks()[0], peers[socket_id].streams[0])
-                    break;
+            for (let track of peers[socket_id].streams[0].getTracks()) {
+                for (let new_track of videoStream.getTracks()) {
+                    if (track.kind == new_track.kind && track.kind == 'video') {
+                        peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
+                        break;
+                    }
                 }
+                // if (track.kind === videoStream.getTracks()[0].kind) {
+                //     break;
+                // }
             }
         }
 
