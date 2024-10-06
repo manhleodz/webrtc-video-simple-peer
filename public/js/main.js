@@ -50,7 +50,7 @@ const configuration = {
  * UserMedia constraints
  */
 let constraints = {
-    audio: true,
+    audio: false,
     video: {
         width: {
             max: 300
@@ -74,18 +74,6 @@ const room = urlParams.get('room');
 
 if (room) {
 
-    // enabling the camera at startup
-    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-        console.log('Received local stream');
-
-        localVideo.srcObject = stream;
-        localVideo.className = " absolute z-10 bottom-[5px] right-[5px] h-[150px] rounded-lg shadow-xl overflow-auto resize";
-        localStream = stream;
-        localStream.getAudioTracks()[0].enabled
-        init()
-
-    }).catch(e => alert(`getusermedia error ${e.name}`))
-
     // audio
     const audio = document.getElementById("audio");
     const audioFileInput = document.getElementById("audioFileInput");
@@ -97,28 +85,29 @@ if (room) {
     const videoPlayer = document.getElementById('videoPlayer');
     let isPlaying = false;
 
+    // enabling the camera at startup
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+        console.log('Received local stream');
+
+        localVideo.srcObject = stream;
+        localVideo.className = " absolute z-10 bottom-[5px] right-[5px] h-[150px] rounded-lg shadow-xl overflow-auto resize";
+        localStream = stream;
+        init()
+
+    }).catch(e => {
+        var videoStream = videoPlayer.captureStream();
+        localVideo.srcObject = videoStream;
+        localVideo.className = " absolute z-10 bottom-[5px] right-[5px] h-[150px] rounded-lg shadow-xl overflow-auto resize";
+        localStream = videoStream;
+        init();
+    })
+
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     playPauseButton.addEventListener("click", async () => {
         if (videoPlayer.src && audio.src) {
-            var audioStream = audio.captureStream();
-            var videoStream = videoPlayer.captureStream();
-
-            const audioTrack = audioStream.getTracks()[0];
-            var newStream = new MediaStream();
-            newStream.addTrack(audioTrack)
-            for (let track of videoStream.getTracks()) {
-                if (track.kind == 'video') {
-                    newStream.addTrack(track);
-                    break;
-                }
-            }
-            localStream = newStream;
-            localVideo.srcObject = newStream
-
-
             if (isPlaying) {
                 audio.pause();
                 videoPlayer.pause();
@@ -142,14 +131,15 @@ if (room) {
     audio.addEventListener('play', () => {
         var audioStream = audio.captureStream();
         console.log("Playing audio..");
+        console.log(peers);
 
         for (let socket_id in peers) {
             if (peers[socket_id].streams[0].getTracks().length = 1 && peers[socket_id].streams[0].getTracks()[0].kind != 'audio') {
                 console.log("Cos moi video thoi af...");
                 console.log(audioStream.getTracks());
 
-                peers[socket_id].streams[0].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0]);
-                break;
+                peers[socket_id].streams[0].addTrack(audioStream.getTracks()[0], peers[socket_id].streams);
+                continue;
             }
             for (let track of peers[socket_id].streams[0].getTracks()) {
                 const new_track = audioStream.getTracks()[0];
@@ -161,6 +151,7 @@ if (room) {
                 }
             }
         }
+
 
         updateButtons()
         return;
@@ -177,9 +168,7 @@ if (room) {
     videoPlayer.addEventListener('play', () => {
         console.log("playing video...");
 
-
         var videoStream = videoPlayer.captureStream();
-        console.log(videoStream.getTracks()[0]);
 
         localVideo.srcObject = null
 
@@ -194,8 +183,20 @@ if (room) {
             }
         }
 
-        localStream = videoStream
-        localVideo.srcObject = videoStream
+        var audioStream = audio.captureStream();
+
+        const audioTrack = audioStream.getTracks()[0];
+
+        var newStream = new MediaStream();
+        newStream.addTrack(audioTrack)
+        for (let track of videoStream.getTracks()) {
+            if (track.kind == 'video') {
+                newStream.addTrack(track);
+                break;
+            }
+        }
+        localStream = newStream;
+        localVideo.srcObject = newStream
 
         updateButtons()
         return;
@@ -269,6 +270,9 @@ function removePeer(socket_id) {
  *                  Set to false if the peer receives the connection. 
  */
 function addPeer(socket_id, am_initiator) {
+    console.log("Local peer when addPeer: ");
+    console.log(localStream.getTracks());
+
     peers[socket_id] = new SimplePeer({
         initiator: am_initiator,
         stream: localStream,
