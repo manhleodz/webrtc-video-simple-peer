@@ -50,7 +50,7 @@ const configuration = {
  * UserMedia constraints
  */
 let constraints = {
-    audio: false,
+    audio: true,
     video: {
         width: {
             max: 300
@@ -137,14 +137,17 @@ if (room) {
             if (peers[socket_id].streams[0].getTracks().length = 1 && peers[socket_id].streams[0].getTracks()[0].kind != 'audio') {
                 console.log("Cos moi video thoi af...");
                 console.log(audioStream.getTracks());
+                console.log(localStream.getTracks());
 
-                peers[socket_id].streams[0].addTrack(audioStream.getTracks()[0], peers[socket_id].streams);
+                peers[socket_id].streams[0].addTrack(audioStream.getTracks()[0], peers[socket_id].streams[0]);
                 continue;
             }
             for (let track of peers[socket_id].streams[0].getTracks()) {
                 const new_track = audioStream.getTracks()[0];
                 if (track.kind == new_track.kind && track.kind == 'audio') {
-                    console.log("Them track audio...");
+                    console.log("Thay track audio...");
+                    console.log(peers[socket_id].streams);
+                    console.log(peers[socket_id].streams[0].getTracks());
 
                     peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
                     break;
@@ -152,8 +155,7 @@ if (room) {
             }
         }
 
-
-        updateButtons()
+        updateButtons();
         return;
     });
 
@@ -172,31 +174,31 @@ if (room) {
 
         localVideo.srcObject = null
 
-        for (let socket_id in peers) {
-            for (let track of peers[socket_id].streams[0].getTracks()) {
-                for (let new_track of videoStream.getTracks()) {
-                    if (track.kind == new_track.kind && track.kind == 'video') {
-                        peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
-                        break;
-                    }
-                }
-            }
-        }
+        // for (let socket_id in peers) {
+        //     for (let track of peers[socket_id].streams[0].getTracks()) {
+        //         for (let new_track of videoStream.getTracks()) {
+        //             if (track.kind == new_track.kind && track.kind == 'video') {
+        //                 peers[socket_id].replaceTrack(track, new_track, peers[socket_id].streams[0]);
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
 
-        var audioStream = audio.captureStream();
+        // var audioStream = audio.captureStream();
 
-        const audioTrack = audioStream.getTracks()[0];
+        // const audioTrack = audioStream.getTracks()[0];
 
-        var newStream = new MediaStream();
-        newStream.addTrack(audioTrack)
-        for (let track of videoStream.getTracks()) {
-            if (track.kind == 'video') {
-                newStream.addTrack(track);
-                break;
-            }
-        }
-        localStream = newStream;
-        localVideo.srcObject = newStream
+        // var newStream = new MediaStream();
+        // newStream.addTrack(audioTrack)
+        // for (let track of videoStream.getTracks()) {
+        //     if (track.kind == 'video') {
+        //         newStream.addTrack(track);
+        //         break;
+        //     }
+        // }
+        // localStream = newStream;
+        localVideo.srcObject = videoStream;
 
         updateButtons()
         return;
